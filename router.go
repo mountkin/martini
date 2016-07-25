@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"reflect"
 	"regexp"
+	"sort"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -332,6 +334,8 @@ type Routes interface {
 	MethodsFor(path string) []string
 	// All returns an array with all the routes in the router.
 	All() []Route
+	// Sort sorts the routes by match precision.
+	Sort()
 }
 
 // URLFor returns the url for the given route name.
@@ -389,6 +393,31 @@ func (r *router) MethodsFor(path string) []string {
 		}
 	}
 	return methods
+}
+
+type routesSort []*route
+
+func (rs routesSort) Len() int {
+	return len(rs)
+}
+
+func (rs routesSort) Less(i, j int) bool {
+	if rs[i].method != rs[j].method {
+		return rs[i].method < rs[j].method
+	}
+
+	if strings.Contains(rs[i].pattern, ":") {
+		return true
+	}
+	return false
+}
+
+func (rs routesSort) Swap(i, j int) {
+	rs[i], rs[j] = rs[j], rs[i]
+}
+
+func (r *router) Sort() {
+	sort.Sort(sort.Reverse(routesSort(r.routes)))
 }
 
 type routeContext struct {
