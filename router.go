@@ -403,13 +403,10 @@ func (rs routesSort) Len() int {
 
 func (rs routesSort) Less(i, j int) bool {
 	if rs[i].method != rs[j].method {
-		return rs[i].method < rs[j].method
+		return rs[i].method > rs[j].method
 	}
 
-	if strings.Contains(rs[i].pattern, ":") {
-		return true
-	}
-	return false
+	return strings.Count(rs[i].pattern, ":") > strings.Count(rs[j].pattern, ":")
 }
 
 func (rs routesSort) Swap(i, j int) {
